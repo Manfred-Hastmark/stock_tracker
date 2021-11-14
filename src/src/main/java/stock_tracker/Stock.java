@@ -1,5 +1,8 @@
 package stock_tracker;
 
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.URL;
@@ -25,6 +28,7 @@ public class Stock {
 
     /* Functions */
 
+    //Requires proper key from polygon, but is faster than getStockFromYahoo
     public void getValuesFromPolygonAPI(String key) {
         try {
             URL url = new URL("https://api.polygon.io/v2/aggs/ticker/" + getSYMBOL() + "/prev?adjusted=true&apiKey=" + key);
@@ -59,7 +63,15 @@ public class Stock {
         return Double.parseDouble(result.toString());
     }
 
-    
+    //Uses selenium driver, which must be setup beforehand. This method is quite slow
+    public void getStockFromYahoo(WebDriver driver) {
+        driver.get("https://finance.yahoo.com/quote/" + SYMBOL);
+        open = Double.parseDouble(driver.findElement(By.xpath("/html/body/div[1]/div/div/div[1]/div/div[3]/div[1]/div/div[1]/div/div/div/div[2]/div[1]/table/tbody/tr[2]/td[2]/span")).getText().replace(",", ""));
+        close = Double.parseDouble(driver.findElement(By.xpath("/html/body/div[1]/div/div/div[1]/div/div[2]/div/div/div[5]/div/div/div/div[3]/div[1]/div[1]/span[1]")).getText().replace(",", ""));
+        String highLow = driver.findElement(By.xpath("/html/body/div[1]/div/div/div[1]/div/div[3]/div[1]/div/div[1]/div/div/div/div[2]/div[1]/table/tbody/tr[5]/td[2]")).getText().replace(",", "");
+        low = Double.parseDouble(highLow.split(" ")[0]);
+        high = Double.parseDouble(highLow.split("- ")[1]);
+    }
 
     @Override
     public String toString() {
